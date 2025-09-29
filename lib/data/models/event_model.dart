@@ -1,39 +1,8 @@
-// data/models/event_model.dart
+// lib/data/models/event_model.dart
 import 'package:isar/isar.dart';
+import 'package:mylifetime/core/utils/date_utils.dart';
 
 part 'event_model.g.dart';
-
-@embedded
-class RecurrenceRuleModel {
-  String? frequency; // 'daily', 'weekly', 'monthly', 'yearly'
-  int? interval;
-  int? count;
-  DateTime? until;
-  
-  @enumerated
-  Weekdays? byWeekday;
-  
-  int? byMonthDay;
-  int? byYearDay;
-  int? byWeek;
-  int? byMonth;
-  int? bySetPos;
-  
-  List<DateTime>? exceptionDates;
-}
-
-enum Weekdays {
-  monday(1),
-  tuesday(2),
-  wednesday(3),
-  thursday(4),
-  friday(5),
-  saturday(6),
-  sunday(7);
-
-  const Weekdays(this.value);
-  final int value;
-}
 
 @Collection()
 class EventModel {
@@ -64,19 +33,56 @@ class EventModel {
   
   String? get recurrenceRuleJson {
     if (recurrenceRule == null) return null;
-    // Сериализация для поиска/фильтрации
+    // В реальной реализации здесь будет сериализация в JSON
     return recurrenceRule.toString();
   }
-}
-
-@Collection()
-class CalendarCategoryModel {
-  Id id = Isar.autoIncrement;
   
-  late String name;
-  late int colorValue;
-  bool isVisible = true;
+  // Метод для получения всех экземпляров повторяющегося события в диапазоне
+  List<DateTime> getOccurrencesInRange(DateTime start, DateTime end) {
+    final occurrences = <DateTime>[];
+    
+    if (recurrenceRule == null) {
+      // Не повторяющееся событие
+      if (_isInRange(startDate, start, end)) {
+        occurrences.add(startDate);
+      }
+      return occurrences;
+    }
+    
+    // Для повторяющихся событий генерируем все экземпляры в диапазоне
+    var current = startDate;
+    final until = recurrenceRule?.until ?? end.add(const Duration(days: 365));
+    
+    while (current.isBefore(until) && occurrences.length < 1000) { // Защита от бесконечного цикла
+      if (_isInRange(current, start, end) && 
+          recurrenceRule!.isDateInRecurrence(current)) {
+        occurrences.add(current);
+      }
+      
+      // Переходим к следующему интервалу в зависимости от частоты
+      current = _getNextOccurrence(current);
+    }
+    
+    return occurrences;
+  }
   
-  @Index()
-  late int sortOrder;
+  DateTime _getNextOccurrence(DateTime current) {
+    switch (recurrenceRule?.frequency) {
+      case 'daily':
+        return current.add(Duration(days: recurrenceRule!.interval ?? 1));
+      case 'weekly':
+        return current.add(Duration(days: 7 * (recurrenceRule!.interval ?? 1)));
+      case 'monthly':
+        return DateTime(current.year, current.month + (recurrenceRule!.interval ?? 1), current.day);
+      case 'yearly':
+        return DateTime(current.year + (recurrenceRule!.interval ?? 1), current.month, current.day);
+      default:
+        return current.add(const Duration(days: 1));
+    }
+  }
+  
+  bool _isInRange(DateTime date, DateTime rangeStart, DateTime rangeEnd) {
+    return (date.isAfter(rangeStart) || date.isAtSameMomentAs(rangeStart)) &&
+           (date.isBefore(rangeEnd) || date.isAtSameMomentAs(rangeEnd));
+  }
 }

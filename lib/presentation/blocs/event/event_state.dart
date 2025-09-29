@@ -37,3 +37,20 @@ class EventLoaded extends EventState {
   @override
   List<Object> get props => [event];
 }
+class EventLoaded extends EventState {
+  final EventEntity event;
+
+  const EventLoaded({required this.event});
+
+  @override
+  List<Object> get props => [event];
+}
+
+class EventOperationSuccess extends EventState {
+  final String message;
+
+  const EventOperationSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

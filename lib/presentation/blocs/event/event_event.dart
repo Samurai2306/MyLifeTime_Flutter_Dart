@@ -56,3 +56,11 @@ class LoadEventById extends EventEvent {
 class EventOperationSuccess extends EventState {
   const EventOperationSuccess();
 }
+class LoadEventById extends EventEvent {
+  final int eventId;
+
+  const LoadEventById(this.eventId);
+
+  @override
+  List<Object> get props => [eventId];
+}

@@ -106,4 +106,18 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       );
     }
   }
+  @override
+  Future<void> _onLoadEventById(
+    LoadEventById event,
+    Emitter<EventState> emit,
+  ) async {
+    emit(EventLoading());
+    
+    final result = await getEventById(GetEventByIdParams(eventId: event.eventId));
+
+    result.fold(
+      (failure) => emit(EventError(failure.message)),
+      (event) => emit(EventLoaded(event: event)),
+    );
+  }
 }

@@ -1,48 +1,6 @@
-// domain/entities/event_entity.dart
+// lib/domain/entities/event_entity.dart
 import 'package:equatable/equatable.dart';
-
-class RecurrenceRuleEntity extends Equatable {
-  final String? frequency;
-  final int? interval;
-  final int? count;
-  final DateTime? until;
-  final List<int>? byWeekday;
-  final int? byMonthDay;
-  final int? byYearDay;
-  final int? byWeek;
-  final int? byMonth;
-  final int? bySetPos;
-  final List<DateTime>? exceptionDates;
-
-  const RecurrenceRuleEntity({
-    this.frequency,
-    this.interval,
-    this.count,
-    this.until,
-    this.byWeekday,
-    this.byMonthDay,
-    this.byYearDay,
-    this.byWeek,
-    this.byMonth,
-    this.bySetPos,
-    this.exceptionDates,
-  });
-
-  @override
-  List<Object?> get props => [
-        frequency,
-        interval,
-        count,
-        until,
-        byWeekday,
-        byMonthDay,
-        byYearDay,
-        byWeek,
-        byMonth,
-        bySetPos,
-        exceptionDates,
-      ];
-}
+import 'recurrence_rule_entity.dart';
 
 class EventEntity extends Equatable {
   final int id;
@@ -85,4 +43,32 @@ class EventEntity extends Equatable {
         recurrenceRule,
         tags,
       ];
+
+  EventEntity copyWith({
+    int? id,
+    String? title,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isAllDay,
+    int? colorValue,
+    int? categoryId,
+    List<DateTime>? reminders,
+    RecurrenceRuleEntity? recurrenceRule,
+    List<String>? tags,
+  }) {
+    return EventEntity(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isAllDay: isAllDay ?? this.isAllDay,
+      colorValue: colorValue ?? this.colorValue,
+      categoryId: categoryId ?? this.categoryId,
+      reminders: reminders ?? this.reminders,
+      recurrenceRule: recurrenceRule ?? this.recurrenceRule,
+      tags: tags ?? this.tags,
+    );
+  }
 }
